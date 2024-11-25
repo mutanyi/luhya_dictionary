@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Pending User Verifications</h3>
+            </div>
+            <div class="card-body">
+                {% if pending_users %}
+                    <div class="list-group">
+                        {% for user in pending_users %}
+                            <div class="list-group-item">
+                                <h5 class="mb-1">{{ user.full_name }}</h5>
+                                <p class="mb-1"><strong>Username:</strong> {{ user.username }}</p>
+                                <p class="mb-1"><strong>Email:</strong> {{ user.email }}</p>
+                                <p class="mb-1"><strong>Institution:</strong> {{ user.institution }}</p>
+                                <div class="mb-2">
+                                    <strong>Credentials:</strong>
+                                    <p class="text-muted">{{ user.credentials }}</p>
+                                </div>
+                                <button class="btn btn-success verify-user" data-user-id="{{ user.id }}">
+                                    Verify User
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No pending user verifications.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Pending Word Entries</h3>
+            </div>
+            <div class="card-body">
+                {% if pending_entries %}
+                    <div class="list-group">
+                        {% for entry in pending_entries %}
+                            <div class="list-group-item">
+                                <h5 class="mb-1">{{ entry.luhya_word }}</h5>
+                                <p class="mb-1"><strong>English:</strong> {{ entry.english_word }}</p>
+                                <p class="mb-1"><strong>Dialect:</strong> {{ entry.dialect }}</p>
+                                <p class="mb-1"><strong>Part of Speech:</strong> {{ entry.part_of_speech }}</p>
+                                <p class="mb-1"><strong>Example:</strong> {{ entry.example_sentence }}</p>
+                                <div class="mb-2">
+                                    <strong>Source:</strong> {{ entry.source }} ({{ entry.source_type }})
+                                </div>
+                                {% if entry.cultural_notes %}
+                                    <div class="mb-2">
+                                        <strong>Cultural Notes:</strong>
+                                        <p class="text-muted">{{ entry.cultural_notes }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if entry.usage_notes %}
+                                    <div class="mb-2">
+                                        <strong>Usage Notes:</strong>
+                                        <p class="text-muted">{{ entry.usage_notes }}</p>
+                                    </div>
+                                {% endif %}
+                                <p class="mb-2">
+                                    <strong>Added by:</strong> {{ entry.added_by.full_name }}
+                                    ({{ entry.added_by.institution }})
+                                </p>
+                                <button class="btn btn-success verify-entry" data-entry-id="{{ entry.id }}">
+                                    Verify Entry
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No pending word entries.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle user verification
+    document.querySelectorAll('.verify-user').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            fetch(`/verify_user/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    this.closest('.list-group-item').remove();
+                    if (!document.querySelector('.verify-user')) {
+                        document.querySelector('.list-group').innerHTML = 
+                            '<p class="text-muted">No pending user verifications.</p>';
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // Handle entry verification
+    document.querySelectorAll('.verify-entry').forEach(button => {
+        button.addEventListener('click', function() {
+            const entryId = this.dataset.entryId;
+            fetch(`/verify_entry/${entryId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    this.closest('.list-group-item').remove();
+                    if (!document.querySelector('.verify-entry')) {
+                        document.querySelector('.list-group').innerHTML = 
+                            '<p class="text-muted">No pending word entries.</p>';
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
+{% endblock %}

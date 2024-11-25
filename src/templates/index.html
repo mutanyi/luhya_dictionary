@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luhya-English Dictionary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .search-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        #search-input {
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        #dialect-select {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .dictionary-entry {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .word-pair {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .pronunciation {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+        .metadata {
+            font-size: 14px;
+            color: #666;
+            margin: 10px 0;
+        }
+        .example {
+            background: #f9f9f9;
+            padding: 10px;
+            border-left: 4px solid #4CAF50;
+            margin: 10px 0;
+        }
+        .notes {
+            margin: 10px 0;
+            padding: 10px;
+            background: #fff3e0;
+            border-radius: 4px;
+        }
+        .source-info {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Luhya-English Dictionary</h1>
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search for a word in Luhya or English...">
+        <select id="dialect-select">
+            <option value="">All Dialects</option>
+            <option value="Maragoli">Maragoli</option>
+            <option value="Bukusu">Bukusu</option>
+            <option value="Tachoni">Tachoni</option>
+            <option value="Idakho">Idakho</option>
+            <option value="Isukha">Isukha</option>
+        </select>
+    </div>
+    <div id="results"></div>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const dialectSelect = document.getElementById('dialect-select');
+        const resultsDiv = document.getElementById('results');
+
+        let timeoutId;
+        function performSearch() {
+            const query = searchInput.value.trim();
+            const dialect = dialectSelect.value;
+            
+            if (query.length < 2 && !dialect) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+
+            const searchParams = new URLSearchParams({
+                q: query,
+                dialect: dialect
+            });
+
+            fetch(`/search?${searchParams.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    resultsDiv.innerHTML = data.map(entry => `
+                        <div class="dictionary-entry">
+                            <div class="word-pair">
+                                <strong>${entry.luhya_word}</strong> - ${entry.english_word}
+                            </div>
+                            <div class="pronunciation">
+                                Pronunciation: ${entry.pronunciation_guide || 'Not available'}
+                            </div>
+                            <div class="metadata">
+                                <strong>Part of Speech:</strong> ${entry.part_of_speech}<br>
+                                <strong>Dialect:</strong> ${entry.dialect || 'Not specified'}
+                            </div>
+                            <div class="example">
+                                <strong>Example:</strong> ${entry.example_sentence}
+                            </div>
+                            ${entry.cultural_notes ? `
+                                <div class="notes">
+                                    <strong>Cultural Notes:</strong> ${entry.cultural_notes}
+                                </div>
+                            ` : ''}
+                            ${entry.usage_notes ? `
+                                <div class="notes">
+                                    <strong>Usage Notes:</strong> ${entry.usage_notes}
+                                </div>
+                            ` : ''}
+                            <div class="source-info">
+                                Source: ${entry.source || 'Unknown'}<br>
+                                Verified by: ${entry.verified_by || 'Pending verification'}
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    if (data.length === 0) {
+                        resultsDiv.innerHTML = '<p>No results found.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultsDiv.innerHTML = '<p>An error occurred while searching.</p>';
+                });
+        }
+
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(performSearch, 300);
+        });
+
+        dialectSelect.addEventListener('change', performSearch);
+    </script>
+</body>
+</html>

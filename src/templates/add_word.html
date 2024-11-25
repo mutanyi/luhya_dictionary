@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Add Word{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">Add New Word Entry</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.luhya_word.label(class="form-label") }}
+                            {{ form.luhya_word(class="form-control") }}
+                            {% for error in form.luhya_word.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.english_word.label(class="form-label") }}
+                            {{ form.english_word(class="form-control") }}
+                            {% for error in form.english_word.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.part_of_speech.label(class="form-label") }}
+                            {{ form.part_of_speech(class="form-select") }}
+                            {% for error in form.part_of_speech.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.dialect.label(class="form-label") }}
+                            {{ form.dialect(class="form-select") }}
+                            {% for error in form.dialect.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.example_sentence.label(class="form-label") }}
+                        {{ form.example_sentence(class="form-control", rows=2) }}
+                        <div class="form-text">Provide an example sentence using this word in context.</div>
+                        {% for error in form.example_sentence.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.pronunciation_guide.label(class="form-label") }}
+                        {{ form.pronunciation_guide(class="form-control") }}
+                        <div class="form-text">Provide a guide for correct pronunciation using phonetic spelling.</div>
+                        {% for error in form.pronunciation_guide.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.cultural_notes.label(class="form-label") }}
+                        {{ form.cultural_notes(class="form-control", rows=3) }}
+                        <div class="form-text">Add any relevant cultural context or significance.</div>
+                        {% for error in form.cultural_notes.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.usage_notes.label(class="form-label") }}
+                        {{ form.usage_notes(class="form-control", rows=3) }}
+                        <div class="form-text">Explain how and when this word is typically used.</div>
+                        {% for error in form.usage_notes.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.source.label(class="form-label") }}
+                            {{ form.source(class="form-control") }}
+                            <div class="form-text">Specify the source of this word (e.g., book title, person, institution).</div>
+                            {% for error in form.source.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.source_type.label(class="form-label") }}
+                            {{ form.source_type(class="form-select") }}
+                            {% for error in form.source_type.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.verification_notes.label(class="form-label") }}
+                        {{ form.verification_notes(class="form-control", rows=2) }}
+                        <div class="form-text">Add any notes that might help in verifying this entry.</div>
+                        {% for error in form.verification_notes.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
