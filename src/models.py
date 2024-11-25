@@ -3,6 +3,22 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from database import db
 
+class Dialect(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    code = db.Column(db.String(20), unique=True, nullable=False)  # e.g., 'bukusu', 'lusamia'
+    ethnic_group = db.Column(db.String(50), nullable=False)  # e.g., 'Bukusu people', 'Samia people'
+    regions = db.Column(db.Text, nullable=False)  # Geographic regions where spoken
+    description = db.Column(db.Text)  # Additional information about the dialect
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship with dictionary entries
+    entries = db.relationship('DictionaryEntry', backref='dialect_info', lazy='dynamic')
+
+    def __repr__(self):
+        return f'<Dialect {self.name}>'
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
@@ -40,7 +56,7 @@ class DictionaryEntry(db.Model):
     english_word = db.Column(db.String(100), nullable=False)
     part_of_speech = db.Column(db.String(50))
     example_sentence = db.Column(db.String(200))
-    dialect = db.Column(db.String(50))
+    dialect_id = db.Column(db.Integer, db.ForeignKey('dialect.id'))  # Changed from dialect string to foreign key
     source = db.Column(db.String(200))
     source_type = db.Column(db.String(50))
     pronunciation_guide = db.Column(db.String(100))

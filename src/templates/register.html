@@ -54,25 +54,29 @@
                     <div class="mb-3">
                         {{ form.institution.label(class="form-label") }}
                         {{ form.institution(class="form-control") }}
+                        <small class="form-text text-muted">Optional: University, Research Institution, or Organization</small>
                         {% for error in form.institution.errors %}
                             <span class="text-danger">{{ error }}</span>
                         {% endfor %}
                     </div>
                     <div class="mb-3">
                         {{ form.credentials.label(class="form-label") }}
-                        {{ form.credentials(class="form-control", rows=4) }}
-                        <div class="form-text">Please provide information about your expertise in the Luhya language, including any relevant academic qualifications, research experience, or community involvement.</div>
+                        {{ form.credentials(class="form-control", rows=3) }}
+                        <small class="form-text text-muted">Optional: Describe your linguistic expertise, research experience, or connection to Luhya language</small>
                         {% for error in form.credentials.errors %}
                             <span class="text-danger">{{ error }}</span>
                         {% endfor %}
                     </div>
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-primary") }}
+                    <div class="alert alert-info">
+                        <p><strong>Note:</strong> Your registration will be reviewed by our administrators before you can contribute to the dictionary. This helps ensure the quality and accuracy of our linguistic data.</p>
+                    </div>
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
                     </div>
                 </form>
             </div>
             <div class="card-footer text-center">
-                <p>Already have an account? <a href="{{ url_for('login') }}">Click to Login!</a></p>
+                <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
             </div>
         </div>
     </div>

@@ -71,8 +71,10 @@ def seed_database():
                                 is_verified=True,
                                 is_published=True,
                                 verified_date=datetime.utcnow(),
-                                source='Luwanga-English Dictionary (Appleby 1943, Anangwe 2006)',
-                                source_type='academic'
+                                source="Appleby's 1943 Luhya-English Vocabulary",
+                                source_type="Academic Publication",
+                                added_by=admin,
+                                verified_by=admin
                             )
                             db.session.add(entry)
                             entries_added += 1
@@ -103,8 +105,10 @@ def seed_database():
                     is_verified=True,
                     is_published=True,
                     verified_date=datetime.utcnow(),
-                    source='Luwanga-English Dictionary (Appleby 1943, Anangwe 2006)',
-                    source_type='academic'
+                    source="Appleby's 1943 Luhya-English Vocabulary",
+                    source_type="Academic Publication",
+                    added_by=admin,
+                    verified_by=admin
                 )
                 db.session.add(entry)
                 entries_added += 1

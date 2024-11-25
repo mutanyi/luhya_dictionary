@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="text-center mb-4">Search Dictionary</h1>
+
+            <div class="search-container mb-4">
+                <form id="search-form" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" 
+                               id="search-query" 
+                               name="query" 
+                               class="form-control" 
+                               value="{{ query }}" 
+                               placeholder="Search for a word in Luhya or English...">
+                        <select id="dialect-filter" 
+                                name="dialect" 
+                                class="form-select">
+                            <option value="">All Dialects</option>
+                            {% for dialect in dialects %}
+                            <option value="{{ dialect.id }}" {% if dialect_id == dialect.id|string %}selected{% endif %}>
+                                {{ dialect.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="search-results">
+                {% include '_search_results.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('search-form');
+    const resultsContainer = document.getElementById('search-results');
+
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            query: document.getElementById('search-query').value,
+            dialect: document.getElementById('dialect-filter').value
+        };
+
+        // Show loading indicator
+        resultsContainer.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+        // Make AJAX request
+        fetch('/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            resultsContainer.innerHTML = data.html;
+            
+            // Update URL without page reload
+            const searchParams = new URLSearchParams(window.location.search);
+            searchParams.set('query', formData.query);
+            if (formData.dialect) {
+                searchParams.set('dialect', formData.dialect);
+            } else {
+                searchParams.delete('dialect');
+            }
+            const newUrl = window.location.pathname + '?' + searchParams.toString();
+            window.history.pushState({}, '', newUrl);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            resultsContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    An error occurred while searching. Please try again.
+                </div>
+            `;
+        });
+    });
+});
+</script>
+{% endblock %}

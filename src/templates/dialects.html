@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Luhya Dialects{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="text-center mb-4">Luhya Dialects</h1>
+
+            {% for dialect in dialects %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h2 class="card-title">{{ dialect.name }}</h2>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ dialect.ethnic_group }}</h6>
+                    
+                    {% if dialect.regions %}
+                    <p class="card-text"><strong>Regions:</strong> {{ dialect.regions }}</p>
+                    {% endif %}
+                    
+                    {% if dialect.description %}
+                    <p class="card-text">{{ dialect.description }}</p>
+                    {% endif %}
+
+                    <p class="card-text">
+                        <small class="text-muted">
+                            {{ dialect.entries.filter_by(is_published=True).count() }} words in dictionary
+                        </small>
+                    </p>
+                    
+                    <a href="{{ url_for('view_dialect', dialect_id=dialect.id) }}" class="btn btn-primary">View Dictionary Entries</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

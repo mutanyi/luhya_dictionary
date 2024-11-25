@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}{{ dialect.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1 class="card-title">{{ dialect.name }}</h1>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ dialect.ethnic_group }}</h6>
+                    
+                    {% if dialect.regions %}
+                    <p class="card-text"><strong>Regions:</strong> {{ dialect.regions }}</p>
+                    {% endif %}
+                    
+                    {% if dialect.description %}
+                    <p class="card-text">{{ dialect.description }}</p>
+                    {% endif %}
+
+                    <p class="card-text">
+                        <small class="text-muted">
+                            {{ entries.total }} words in dictionary
+                        </small>
+                    </p>
+                </div>
+            </div>
+
+            <h2 class="mb-3">Dictionary Entries</h2>
+
+            {% if entries.items %}
+                {% for entry in entries.items %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ entry.luhya_word }} - {{ entry.english_word }}</h3>
+                        {% if entry.part_of_speech %}
+                        <p class="card-text"><strong>Part of Speech:</strong> {{ entry.part_of_speech }}</p>
+                        {% endif %}
+                        {% if entry.usage_notes %}
+                        <p class="card-text"><strong>Usage Notes:</strong> {{ entry.usage_notes }}</p>
+                        {% endif %}
+                        <a href="{{ url_for('view_entry', entry_id=entry.id) }}" class="btn btn-sm btn-primary">View Details</a>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Pagination -->
+                {% if entries.pages > 1 %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if entries.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('view_dialect', dialect_id=dialect.id, page=entries.prev_num) }}">Previous</a>
+                        </li>
+                        {% endif %}
+
+                        {% for page_num in entries.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+                            {% if page_num %}
+                                <li class="page-item {% if page_num == entries.page %}active{% endif %}">
+                                    <a class="page-link" href="{{ url_for('view_dialect', dialect_id=dialect.id, page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if entries.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('view_dialect', dialect_id=dialect.id, page=entries.next_num) }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">No entries found for this dialect.</div>
+            {% endif %}
+
+            <div class="mt-3">
+                <a href="{{ url_for('dialects') }}" class="btn btn-secondary">Back to Dialects</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

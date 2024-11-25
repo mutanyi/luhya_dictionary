@@ -1,172 +1,197 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luhya-English Dictionary</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .search-container {
-            text-align: center;
-            margin: 20px 0;
-        }
-        #search-input {
-            padding: 10px;
-            width: 300px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-        }
-        #dialect-select {
-            padding: 10px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            margin-left: 10px;
-        }
-        #results {
-            margin-top: 20px;
-        }
-        .dictionary-entry {
-            background: white;
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .word-pair {
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        .pronunciation {
-            color: #666;
-            font-style: italic;
-            margin-bottom: 10px;
-        }
-        .metadata {
-            font-size: 14px;
-            color: #666;
-            margin: 10px 0;
-        }
-        .example {
-            background: #f9f9f9;
-            padding: 10px;
-            border-left: 4px solid #4CAF50;
-            margin: 10px 0;
-        }
-        .notes {
-            margin: 10px 0;
-            padding: 10px;
-            background: #fff3e0;
-            border-radius: 4px;
-        }
-        .source-info {
-            font-size: 12px;
-            color: #888;
-            margin-top: 10px;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Luhya-English Dictionary</h1>
-    <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search for a word in Luhya or English...">
-        <select id="dialect-select">
-            <option value="">All Dialects</option>
-            <option value="Maragoli">Maragoli</option>
-            <option value="Bukusu">Bukusu</option>
-            <option value="Tachoni">Tachoni</option>
-            <option value="Idakho">Idakho</option>
-            <option value="Isukha">Isukha</option>
-        </select>
-    </div>
-    <div id="results"></div>
+{% extends "base.html" %}
 
-    <script>
-        const searchInput = document.getElementById('search-input');
-        const dialectSelect = document.getElementById('dialect-select');
-        const resultsDiv = document.getElementById('results');
+{% block title %}Home{% endblock %}
 
-        let timeoutId;
-        function performSearch() {
-            const query = searchInput.value.trim();
-            const dialect = dialectSelect.value;
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="text-center mb-4">Luhya-English Dictionary</h1>
             
-            if (query.length < 2 && !dialect) {
-                resultsDiv.innerHTML = '';
-                return;
-            }
+            <div class="search-container mb-4">
+                <div class="input-group">
+                    <input type="text" id="search-input" class="form-control" placeholder="Search for a word in Luhya or English...">
+                    <select id="dialect-select" class="form-select">
+                        <option value="">All Dialects</option>
+                        {% for dialect in dialects %}
+                        <option value="{{ dialect.id }}">{{ dialect.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
 
-            const searchParams = new URLSearchParams({
-                q: query,
-                dialect: dialect
-            });
+            <div id="results">
+                <!-- Search results will be displayed here -->
+            </div>
 
-            fetch(`/search?${searchParams.toString()}`)
-                .then(response => response.json())
-                .then(data => {
-                    resultsDiv.innerHTML = data.map(entry => `
-                        <div class="dictionary-entry">
-                            <div class="word-pair">
-                                <strong>${entry.luhya_word}</strong> - ${entry.english_word}
-                            </div>
-                            <div class="pronunciation">
-                                Pronunciation: ${entry.pronunciation_guide || 'Not available'}
-                            </div>
-                            <div class="metadata">
-                                <strong>Part of Speech:</strong> ${entry.part_of_speech}<br>
-                                <strong>Dialect:</strong> ${entry.dialect || 'Not specified'}
-                            </div>
-                            <div class="example">
-                                <strong>Example:</strong> ${entry.example_sentence}
-                            </div>
-                            ${entry.cultural_notes ? `
-                                <div class="notes">
-                                    <strong>Cultural Notes:</strong> ${entry.cultural_notes}
-                                </div>
-                            ` : ''}
-                            ${entry.usage_notes ? `
-                                <div class="notes">
-                                    <strong>Usage Notes:</strong> ${entry.usage_notes}
-                                </div>
-                            ` : ''}
-                            <div class="source-info">
-                                Source: ${entry.source || 'Unknown'}<br>
-                                Verified by: ${entry.verified_by || 'Pending verification'}
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    if (data.length === 0) {
-                        resultsDiv.innerHTML = '<p>No results found.</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    resultsDiv.innerHTML = '<p>An error occurred while searching.</p>';
-                });
+            {% if recent_entries %}
+            <div class="mt-5">
+                <h2>Recent Additions</h2>
+                {% for entry in recent_entries %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ entry.luhya_word }} - {{ entry.english_word }}</h3>
+                        {% if entry.part_of_speech %}
+                        <p class="card-text"><strong>Part of Speech:</strong> {{ entry.part_of_speech }}</p>
+                        {% endif %}
+                        {% if entry.dialect_info %}
+                        <p class="card-text"><strong>Dialect:</strong> {{ entry.dialect_info.name }}</p>
+                        {% endif %}
+                        {% if entry.usage_notes %}
+                        <p class="card-text"><strong>Usage Notes:</strong> {{ entry.usage_notes }}</p>
+                        {% endif %}
+                        <a href="{{ url_for('view_entry', entry_id=entry.id) }}" class="btn btn-sm btn-primary">View Details</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+let timeoutId;
+let currentPage = 1;
+
+function performSearch(page = 1) {
+    const query = document.getElementById('search-input').value;
+    const dialect = document.getElementById('dialect-select').value;
+    const resultsDiv = document.getElementById('results');
+    
+    if (query.length < 2 && !dialect) {
+        resultsDiv.innerHTML = '';
+        return;
+    }
+    
+    resultsDiv.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    
+    fetch(`/search?q=${encodeURIComponent(query)}&dialect=${encodeURIComponent(dialect)}&page=${page}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
         }
-
-        searchInput.addEventListener('input', () => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(performSearch, 300);
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        resultsDiv.innerHTML = '';
+        
+        if (data.error) {
+            resultsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+            return;
+        }
+        
+        if (!data.entries || data.entries.length === 0) {
+            resultsDiv.innerHTML = '<div class="alert alert-info">No results found.</div>';
+            return;
+        }
+        
+        // Create results container
+        const resultsContainer = document.createElement('div');
+        resultsContainer.className = 'search-results';
+        
+        // Add search summary
+        const searchSummary = document.createElement('div');
+        searchSummary.className = 'search-summary mb-3';
+        searchSummary.innerHTML = `<p>Found ${data.total} result${data.total !== 1 ? 's' : ''}</p>`;
+        resultsContainer.appendChild(searchSummary);
+        
+        // Add entries
+        data.entries.forEach(entry => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'card mb-3';
+            
+            let html = `
+                <div class="card-body">
+                    <h3 class="card-title">${entry.luhya_word} - ${entry.english_word}</h3>
+                    <p class="card-text"><strong>Part of Speech:</strong> ${entry.part_of_speech || 'N/A'}</p>
+            `;
+            
+            if (entry.dialect) {
+                html += `<p class="card-text"><strong>Dialect:</strong> ${entry.dialect}</p>`;
+            }
+            
+            if (entry.example_sentence) {
+                html += `<p class="card-text"><strong>Example:</strong> ${entry.example_sentence}</p>`;
+            }
+            
+            if (entry.usage_notes) {
+                html += `<p class="card-text"><strong>Usage Notes:</strong> ${entry.usage_notes}</p>`;
+            }
+            
+            html += `<a href="/entry/${entry.id}" class="btn btn-sm btn-primary">View Details</a>`;
+            html += '</div>';
+            entryDiv.innerHTML = html;
+            resultsContainer.appendChild(entryDiv);
         });
+        
+        // Add pagination if needed
+        if (data.pages > 1) {
+            const paginationDiv = document.createElement('div');
+            paginationDiv.className = 'pagination justify-content-center mt-4';
+            let paginationHtml = '<nav><ul class="pagination">';
+            
+            // Previous button
+            paginationHtml += `
+                <li class="page-item ${!data.has_prev ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="return goToPage(${data.current_page - 1})">Previous</a>
+                </li>
+            `;
+            
+            // Page numbers
+            for (let i = 1; i <= data.pages; i++) {
+                paginationHtml += `
+                    <li class="page-item ${i === data.current_page ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="return goToPage(${i})">${i}</a>
+                    </li>
+                `;
+            }
+            
+            // Next button
+            paginationHtml += `
+                <li class="page-item ${!data.has_next ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="return goToPage(${data.current_page + 1})">Next</a>
+                </li>
+            `;
+            
+            paginationHtml += '</ul></nav>';
+            paginationDiv.innerHTML = paginationHtml;
+            resultsContainer.appendChild(paginationDiv);
+        }
+        
+        resultsDiv.appendChild(resultsContainer);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        resultsDiv.innerHTML = 
+            '<div class="alert alert-danger">An error occurred while searching. Please try again.</div>';
+    });
+}
 
-        dialectSelect.addEventListener('change', performSearch);
-    </script>
-</body>
-</html>
+function goToPage(page) {
+    if (page < 1) return false;
+    currentPage = page;
+    performSearch(page);
+    return false;
+}
+
+const searchInput = document.getElementById('search-input');
+const dialectSelect = document.getElementById('dialect-select');
+
+searchInput.addEventListener('input', () => {
+    clearTimeout(timeoutId);
+    currentPage = 1;
+    timeoutId = setTimeout(() => performSearch(1), 300);
+});
+
+dialectSelect.addEventListener('change', () => {
+    currentPage = 1;
+    performSearch(1);
+});
+</script>
+
+{% endblock %}
